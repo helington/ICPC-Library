@@ -2,14 +2,16 @@
 
 using namespace std;
 #define ll long long
+// #define int long long  // when necessary
 #define endl '\n'
-#define MOD 1000000007
+
+const ll MOD = 1e9 + 7;
 
 void solve() {
     // Code here
 }
 
-int main() {
+signed main() {
     ios_base::sync_with_stdio(false);
     cin.tie(0);
 
@@ -17,11 +19,13 @@ int main() {
     // freopen("input.in", "r", stdin); 
     // freopen("output.out", "w", stdout);
 
-    int tc = 1;
-    // cin >> tc; // Uncomment if the problem has multiple test cases
-    while (tc--) {
+    // For multiple test cases
+    int tc; cin >> tc; while (tc--) {
         solve();
     }
+
+    // For just one test case
+    solve();
 
     return 0;
 }
