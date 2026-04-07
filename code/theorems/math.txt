@@ -1,0 +1,17 @@
+Valor esperado: E[X]= sum(xi*P(xi))
+Linearidade da esperança: E[X+Y]=E[X]+E[Y] (e também E[c*X]=c*E[X])
+
+Estrelas e Barras (Stars and Bars):
+C(n+k-1, k-1), sendo N o numero total de pontos e K o numero de carinhas pra quem eu quero distribuir
+
+Catalão:
+Cat de n = (1/(n+1)) * C(2n, n)
+
+Propriedade legal de log:
+logb(a) = (logc(a)) / (logc(b))
+
+Quantidade de divisores de um número:
+fatore-o em números primos, pegue os expoentes da cada fator,
+adicione 1 a cada um deles e multiplique-os, esse é o numero de divisores;
+Ex: 720 = 2 ^ 4 * 3 ^ 2 * 5 ^ 1,
+numero de divisores: (4 + 1) * (2 + 1) * (1 + 1) = 5 * 3 * 2 = 30
