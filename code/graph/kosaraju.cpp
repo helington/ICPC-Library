@@ -19,42 +19,33 @@ vector<bool> vis;
 int n, m;
 int curr=0;
 
-void dfs(int u=1) {
-    vis[u] = true;
-    for (auto &v : adj[u]) {
-        if (vis[v]) continue;
-        dfs(v);
-    }
-    ord.push_back(u);
-}
-
-void dfsr(int u) {
-    comp[u] = curr;
-    for (auto &v : adjr[u]) {
-        if (~comp[v]) continue;
-        dfsr(v);
-    }
-}
-
 void kosaraju() {
     ord.clear();
     comp = vector<int>(n+1, -1);
     vis = vector<bool>(n+1, false);
     curr = 0;
-
     for (int i = 0; i <= n; i++)
         dag[i].clear();
 
-    for (int u=1; u <= n; u++) {
-        if (vis[u]) continue;
-        dfs(u);
-    }
+    auto dfs = [&](auto &&dfs, int u) -> void {
+        vis[u] = true;
+        for (auto &v : adj[u])
+            if (!vis[v]) dfs(dfs, v);
+        ord.push_back(u);
+    };
+
+    auto dfsr = [&](auto &&dfsr, int u) -> void {
+        comp[u] = curr;
+        for (auto &v : adjr[u])
+            if (comp[v] == -1) dfsr(dfsr, v);
+    };
+
+    for (int u=1; u <= n; u++)
+        if (!vis[u]) dfs(dfs, u);
     reverse(ord.begin(), ord.end());
 
-    for (auto &u : ord) {
-        if (~comp[u]) continue;
-        dfsr(u), curr++;
-    }
+    for (auto &u : ord)
+        if (comp[u] == -1) dfsr(dfsr, u), curr++;
 
     vector<bool> flag(curr, false);
 
