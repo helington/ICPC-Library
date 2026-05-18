@@ -1,29 +1,40 @@
 #include <bits/stdc++.h>
-
 using namespace std;
+#define ll long long
+#define endl '\n'
 
-// MinQueue
+// MinQueue (Monotonic Queue)
 
-// - push(x): Adds element to Queue.
-// - pop(): Removes element from queue. (removes oldest element).
-// - min(): Returns minimum Queue.
+// A queue data structure that supports finding the minimum element in O(1).
+// Useful for sliding window problems where you need the minimum of a subarray.
 
-// O(1) amortized per operation.
+// 0-indexed internally.
+// Time Complexity: O(1) amortized per operation.
+// Space Complexity: O(N) where N is the maximum number of elements.
 
 template<typename T>
-struct MinQueue : deque<pair<T, int>> {
-    T min() { return this->front().first; }
+struct MinQueue {
+    deque<pair<T, int>> dq;
+    int sz = 0;
 
-    void push(int x) {
+    T min() { return dq.front().first; }
+
+    void push(T x) {
         int cnt = 1;
-        while (!this->empty() and x <= this->back().first) {
-            cnt += this->back().second;
-            this->pop_back();
+        while (!dq.empty() && x <= dq.back().first) {
+            cnt += dq.back().second;
+            dq.pop_back();
         }
-        this->push_back({x, cnt});
+        dq.push_back({x, cnt});
+        sz++;
     }
 
     void pop() {
-        if (!--this->front().second) this->pop_front();
+        if (dq.front().second > 1) dq.front().second--;
+        else dq.pop_front();
+        sz--;
     }
+
+    bool empty() { return sz == 0; }
+    int size() { return sz; }
 };
