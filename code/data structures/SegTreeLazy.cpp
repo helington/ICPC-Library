@@ -1,22 +1,53 @@
-template<typename T>
+#include <bits/stdc++.h>
+using namespace std;
+#define ll long long
+#define endl '\n'
+
+// Segment Tree with Lazy Propagation (Node/Tag Pattern)
+
+// Advanced and highly versatile Segment Tree implementation.
+// Uses separate Node and Tag (Lazy) structures to cleanly decouple
+// tree logic from specific range operations (Sum, Min, Max, etc.).
+
+// 0-indexed internally (ranges). Tree nodes are 1-indexed.
+// Time Complexity: 
+// - Build: O(N)
+// - Range Update: O(log N)
+// - Range Query: O(log N)
+// Space Complexity: O(4 * N)
+
+struct Tag {
+    ll op;
+
+    Tag() : op(0) {}
+    Tag(ll v) : op(v) {}
+
+    void compose(Tag &t) { op += t.op; }
+};
+
+struct Node {
+    ll val;
+
+    Node() : val(0) {}
+    Node(ll v) : val(v) {}
+
+    void apply(Tag &t, ll sz) { val += t.op * sz; }
+};
+
+Node merge(Node n1, Node n2) { return Node(n1.val + n2.val); }
+
 struct SegTree {
-    const T NEUTRAL = 0;
-
     int N;
-    vector<T> seg;
-    vector<T> lazy;
+    vector<Node> seg;
+    vector<Tag> lazy;
 
-    // Define based on specific problem: 0 for Sum, INF for Min, -INF for Max
+    SegTree(int n) : N(n), seg(4 * n), lazy(4 * n) {}
 
-    SegTree(int n) : N(n), seg(4 * n, NEUTRAL), lazy(4 * n, NEUTRAL) {}
-
-    SegTree(const vector<T> &v) : N(v.size()), seg(4 * N, NEUTRAL), lazy(4 * N, NEUTRAL) {
+    SegTree(vector<ll> &v) : N(v.size()), seg(4 * N), lazy(4 * N) {
         build(v, 1, 0, N - 1);
     }
 
-    T join(T vl, T vr) { return vl + vr; }
-
-    void build(const vector<T> &v, int p, int l, int r) {
+    void build(vector<ll> &v, int p, int l, int r) {
         if (l == r) {
             seg[p] = v[l];
             return;
@@ -27,51 +58,55 @@ struct SegTree {
         build(v, 2 * p, l, m);
         build(v, 2 * p + 1, m + 1, r);
         
-        seg[p] = join(seg[2 * p], seg[2 * p + 1]);
+        seg[p] = merge(seg[2 * p], seg[2 * p + 1]);
     }
 
     void unlazy(int p, int l, int r) {
-        if (lazy[p] == NEUTRAL) return;
-        
+        if (l == r) return;
+
         int m = (l + r) / 2;
-        
-        // IMPORTANT: If this was Min/Max, do NOT multiply by (r - l + 1)
-        seg[p] += (r - l + 1) * lazy[p];
-        if (l != r) {
-            lazy[2 * p] += lazy[p];
-            lazy[2 * p + 1] += lazy[p];
-        }
-        lazy[p] = NEUTRAL;
+        int e = 2 * p, d = e + 1;
+
+        seg[e].apply(lazy[p], m - l + 1);
+        seg[d].apply(lazy[p], r - m);
+
+        lazy[e].compose(lazy[p]);
+        lazy[d].compose(lazy[p]);
+
+        lazy[p] = Tag();
     }
 
-    T query(int a, int b, int p, int l, int r) {
-        unlazy(p, l, r);
-        if (b < l or r < a) return NEUTRAL;
+    Node query(int a, int b, int p, int l, int r) {
+        if (b < l or r < a) return Node();
         if (a <= l and r <= b) return seg[p];
+
+        unlazy(p, l, r);
 
         int m = (l + r) / 2;
 
-        return join(query(a, b, 2 * p, l, m), 
+        return merge(query(a, b, 2 * p, l, m), 
                     query(a, b, 2 * p + 1, m + 1, r));
     }
 
-    T query(int a, int b) { return query(a, b, 1, 0, N - 1); }
-
-    void update(int idx, T val, int p, int l, int r) {
-        unlazy(p, l, r);
-        if (idx < l or r < idx) return;
+    void update(int a, int b, int p, int l, int r, Tag &t) {
+        if (b < l or r < a) return;
         if (a <= l and r <= b) {
-            lazy[p] = join(lazy[p], val);
-            return unlazy(p, l, r);
+            ll sz = r - l + 1;
+            seg[p].apply(t, sz);
+            lazy[p].compose(t);
+            return;
         }
 
+        unlazy(p, l, r);
+        
         int m = (l + r) / 2;
         
-        update(idx, val, 2 * p, l, m);
-        update(idx, val, 2 * p + 1, m + 1, r);
+        update(a, b, 2 * p, l, m, t);
+        update(a, b, 2 * p + 1, m + 1, r, t);
         
-        seg[p] = join(seg[2 * p], seg[2 * p + 1]);
+        seg[p] = merge(seg[2 * p], seg[2 * p + 1]);
     }
-
-    void update(int idx, T val) { update(idx, val, 1, 0, N - 1); }
+    
+    ll query(int a, int b) { return query(a, b, 1, 0, N - 1).val; }
+    void update(int a, int b, ll val) { Tag t(val); update(a, b, 1, 0, N - 1, t); }
 };
