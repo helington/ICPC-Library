@@ -22,9 +22,13 @@ struct HLD {
     vector<vector<int>> adj;
     vector<int> sz, parent, tin, nxt;
     SegTree seg;
+    // If You need to use K_th ancestor
+    vector<int> node_at;
 
     HLD(int n)
-        : N(n), seg(n+1), adj(n+1), sz(n+1), parent(n+1), tin(n+1), nxt(n+1) {}
+        : N(n), seg(n+1), adj(n+1), sz(n+1), parent(n+1), tin(n+1), nxt(n+1),
+            // If You need to use K_th ancestor
+            node_at(n+1) {}
     
     void add_edge(int u, int v) {
         adj[u].push_back(v);
@@ -53,6 +57,8 @@ struct HLD {
 
     void hld(int u, int p) {
         tin[u] = timer++;
+        // If You need to use K_th ancestor
+        node_at[tin[u]] = u;
 
         for (auto &v : adj[u]) 
             if (v != p) {
@@ -76,6 +82,16 @@ struct HLD {
     ll query_subtree(int u) { return seg.query(tin[u], tin[u]+sz[u]-1); }
     void update_subtree(int u, ll x) { seg.update(tin[u], tin[u]+sz[u]-1, x); }
 
+    // OPTIONAL
+    int k_th(int u, int k) {
+        while (k) {
+            int dist = tin[u] - tin[nxt[u]];
+            if (k <= dist) return node_at[tin[u] - k];
+            k -= dist + 1;
+            u = parent[nxt[u]];
+        }
+        return u;
+    };
     int LCA(int u, int v) {
         if (tin[u] < tin[v]) swap(u, v);
         return nxt[u] == nxt[v] ? v : LCA(parent[nxt[u]], v);
