@@ -38,7 +38,7 @@ struct TwoSat {
 	void add_xor  (int u, int v){ add_or(u, v); add_nand(u, v); }
 	void add_xnor (int u, int v){ add_xor(u, ~v); }
 
-    vector<int> tarjan() {
+	vector<int> tarjan() {
 		vector<int> low(2*N), pre(2*N, -1), scc(2*N, -1), st;
 		int clk = 0, ncomps = 0;
 
@@ -63,9 +63,9 @@ struct TwoSat {
 			}
 		};
 
-	for (int u = 0; u < 2*N; u++)
-		if (pre[u] == -1)
-			dfs(dfs, u);
+		for (int u = 0; u < 2*N; u++)
+			if (pre[u] == -1)
+				dfs(dfs, u);
 	
 		return scc; //tarjan SCCs order is the reverse of topoSort, so (u->v if scc[v] <= scc[u])
 	}
