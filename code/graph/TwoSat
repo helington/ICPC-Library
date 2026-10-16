@@ -1,0 +1,83 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define ll long long
+#define endl '\n'
+
+// 2-SAT (Implication Graph + Tarjan SCC)
+
+// Solves 2-SAT problems using strongly connected components.
+// Supports OR, AND, XOR, XNOR, NAND, NOR, implications, and fixed literals.
+// Variables are 0-indexed: u represents x_u, and ~u represents NOT x_u.
+
+// Time Complexity: O(N + M).
+// Space Complexity: O(N + M).
+// Returns an empty vector if unsatisfiable, otherwise a valid assignment.
+
+struct TwoSat {
+	int N;
+	vector<vector<int>> adj;
+	
+	TwoSat(int N) : N(N), adj(2 * N) {}
+	inline int id(int u) const{ return u < 0 ? ((~u)+N)%(2*N) : u; }
+
+	void add_or(int u, int v){
+		adj[id(~u)].push_back(id(v));
+		adj[id(~v)].push_back(id(u));
+  	}
+
+	void add_nand(int u, int v) {
+		adj[id(u)].push_back(id(~v));
+		adj[id(v)].push_back(id(~u));
+	}
+
+	void set_true (int u){ adj[id(~u)].push_back(id(u)); }
+	void set_false(int u){ set_true(~u); }
+	void add_imply(int u, int v){ add_or(~u, v); }
+	void add_and  (int u, int v){ set_true(u);  set_true(v);    }
+	void add_nor  (int u, int v){ add_and(~u, ~v); }
+	void add_xor  (int u, int v){ add_or(u, v); add_nand(u, v); }
+	void add_xnor (int u, int v){ add_xor(u, ~v); }
+
+    vector<int> tarjan() {
+		vector<int> low(2*N), pre(2*N, -1), scc(2*N, -1), st;
+		int clk = 0, ncomps = 0;
+
+		auto dfs = [&](auto&& dfs, int u) -> void {
+			pre[u] = low[u] = clk++;
+			st.push_back(u);
+
+			for (auto v : adj[u]) {
+				if (pre[v] == -1) {
+					dfs(dfs, v);
+					low[u] = min(low[u], low[v]);
+				}
+				else if (scc[v] == -1)
+					low[u] = min(low[u], pre[v]);
+			}
+
+			if (low[u] == pre[u]) {
+				int v = -1;
+				while (v != u)
+					scc[v = st.back()] = ncomps, st.pop_back();
+				ncomps++;
+			}
+		};
+
+	for (int u = 0; u < 2*N; u++)
+		if (pre[u] == -1)
+			dfs(dfs, u);
+	
+		return scc; //tarjan SCCs order is the reverse of topoSort, so (u->v if scc[v] <= scc[u])
+	}
+
+	vector<bool> solve() {
+		vector<bool> ans(N);
+		auto scc = tarjan();
+
+		for (int u = 0; u < N; u++)
+			if(scc[u] == scc[u+N]) return {}; //false
+			else ans[u] = scc[u+N] > scc[u];
+
+		return ans;	//true
+	}
+};
