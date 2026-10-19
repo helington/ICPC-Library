@@ -4,10 +4,16 @@ using namespace std;
 #define ll long long
 #define endl '\n'
 
-// HLD Non-Commutative + Lazy Propagation
-// Query/Update Path: O(log^2 N)
-// Build: O(N)
-// Node() = identity; merge(a,b) = a followed by b.
+// Heavy-Light Decomposition (Non-Commutative + Lazy Propagation)
+// Supports associative, non-commutative path operations.
+// Node/Tag pattern with forward and backward aggregates.
+// Vertices are 1-indexed; segment tree positions are 0-indexed.
+//
+// Time Complexity:
+// - Build: O(N)
+// - Path Update: O(log^2 N)
+// - Path Query: O(log^2 N)
+// Space Complexity: O(N)
 
 struct Tag {
     // TODO: update information
